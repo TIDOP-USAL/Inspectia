@@ -84,8 +84,8 @@ class ProjectInspectia(Project):
             str_error = ('Executing SQLs saving project definition: {}, error:\n{}'
                          .format(project_name, str_error))
             return str_error, definition_is_saved
-        self.db_project = db_project
-        self.db_schema = db_schema
+        # self.db_project = db_project
+        # self.db_schema = db_schema
         return str_error, definition_is_saved
 
     def open(self, project_name):
@@ -96,6 +96,10 @@ class ProjectInspectia(Project):
             return str_error
         project_id = db_project[defs_server_api.PROJECT_TAG_ID]
         db_schema = defs_server_api.PROJECT_SCHEMA_PREFIX + str(project_id)
+        str_error, db_project_data = self.pgs_connection.get_project_data(project_id)
+        if str_error:
+            str_error = ('Recovering project data: {}, error:\n{}'.format(project_name, str_error))
+            return str_error
 
         # project definition
         str_error = super().load_project_definition(db_schema = db_schema)
@@ -128,8 +132,7 @@ class ProjectInspectia(Project):
         self.sqls_to_process.clear()
 
         #locations
-
-        self.db_project = db_project
+        self.db_project = db_project_data
         self.db_schema = db_schema
         return str_error
 

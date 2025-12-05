@@ -74,7 +74,28 @@ class InspectiaDialog(QDialog):
         self.user_is_admin = False
         self.user_is_editor = False
         self.user_is_user = False
+        self.role_by_project_user = {}
         self.initialize()
+
+    def add_role_to_user(self):
+        str_error = ''
+        project_id = self.project.db_project[defs_server_api.PROJECT_TAG_ID]
+        project_name = self.project.db_project[defs_server_api.PROJECT_TAG_NAME]
+        user_email = self.userComboBox.currentText()
+        user_role = self.roleComboBox.currentText()
+        user_id = None
+        for db_user_email in self.pgs_connection.user_by_email:
+            if db_user_email.casefold() == user_email:
+                user_id = self.pgs_connection.user_by_email[db_user_email][defs_server_api.USERS_TAG_ID]
+                break
+        if user_id is None: # never
+            return str_error
+        str_error = self.pgs_connection.add_user_to_project(project_id, user_id, user_role)
+        if str_error:
+            str_error = ('Adding user: {} to project: {}, error:\n{}'.format(user_email, project_name, str_error))
+            return str_error
+        self.update_user_management()
+        return str_error
 
     def close_project(self):
         self.projectDefinitionPushButton.setEnabled(False)
@@ -97,7 +118,7 @@ class InspectiaDialog(QDialog):
             str_error = ('Deleting project: {}, error:\n{}'.format(project_name, str_error))
             Tools.info_msg(str_error)
             return
-        self.update_project_management_page()
+        self.update_project_management()
         return
 
     def initialize(self):
@@ -129,13 +150,22 @@ class InspectiaDialog(QDialog):
         self.registerPushButton.clicked.connect(self.register)
         self.loginPushButton.clicked.connect(self.login)
         self.projectComboBox.addItem(defs_main.NO_COMBO_SELECT)
-        self.projectRolLineEdit.setEnabled(False)
+        self.projectRoleLineEdit.setEnabled(False)
         self.projectComboBox.currentIndexChanged.connect(self.select_project)
         self.closeProjectPushButton.clicked.connect(self.close_project)
         self.deleteProjectPushButton.clicked.connect(self.delete_project)
         self.newProjectPushButton.clicked.connect(self.new_project)
         self.openProjectPushButton.clicked.connect(self.open_project)
         self.projectDefinitionPushButton.clicked.connect(self.project_definition)
+        self.userComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.roleComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.roleComboBox.addItem(defs_server_api.ROLE_ADMIN)
+        self.roleComboBox.addItem(defs_server_api.ROLE_EDITOR)
+        self.roleComboBox.addItem(defs_server_api.ROLE_USER)
+        self.userComboBox.currentIndexChanged.connect(self.select_user)
+        self.roleComboBox.currentIndexChanged.connect(self.select_role)
+        self.addRoleToUserPushButton.clicked.connect(self.add_role_to_user)
+        self.removeRoleToUserPushButton.clicked.connect(self.remove_role_to_user)
         # process_path_by_provider = {}
         # for provider in app_defs_processes.processes_providers:
         # process_path_by_provider[provider] = []
@@ -151,13 +181,15 @@ class InspectiaDialog(QDialog):
         # return
         # self.processes_manager = processes_manager
         # self.processesManagerPushButton.clicked.connect(self.select_processes_manager_gui)
-        self.toolBox.setItemEnabled(0, False)
-        self.toolBox.setItemEnabled(1, False)
+        self.toolBox.setEnabled(False)
+        # self.toolBox.setItemEnabled(0, False)
+        # self.toolBox.setItemEnabled(1, False)
         return
 
     def login(self):
         self.projectComboBox.setCurrentIndex(0)
-        self.toolBox.setItemEnabled(0, False)
+        self.toolBox.setEnabled(False)
+        # self.toolBox.setItemEnabled(0, False)
         title = 'Login in Inspectia'
         url = self.gis_server_api_url
         email = self.gis_server_api_email
@@ -170,7 +202,7 @@ class InspectiaDialog(QDialog):
             Tools.error_msg(str_error)
             if self.gis_server_api_email is None:
                 self.toolBox.setItemEnabled(0, False)
-                self.update_project_management_page()
+                self.update_project_management()
             return
         email = dialog.email
         password = dialog.password
@@ -182,7 +214,7 @@ class InspectiaDialog(QDialog):
             Tools.error_msg(str_error)
             if self.gis_server_api_email is None:
                 self.toolBox.setItemEnabled(0, False)
-                # self.update_project_management_page()
+                # self.update_project_management()
             return
         self.gis_server_api_url = url
         self.settings.setValue(defs_qsettings.QSETTINGS_TAG_GIS_SERVER_API_URL, self.gis_server_api_url)
@@ -191,8 +223,9 @@ class InspectiaDialog(QDialog):
         self.gis_server_api_password = password
         self.settings.setValue(defs_qsettings.QSETTINGS_TAG_GIS_SERVER_API_PASSWORD, self.gis_server_api_password)
         self.settings.sync()
-        self.toolBox.setItemEnabled(0, True)
-        self.update_project_management_page()
+        self.toolBox.setEnabled(True)
+        # self.toolBox.setItemEnabled(0, True)
+        self.update_project_management()
         self.toolBox.setCurrentIndex(0)
         return
 
@@ -213,7 +246,7 @@ class InspectiaDialog(QDialog):
         if not definition_is_saved:
             del self.project
             self.project = None
-        self.update_project_management_page()
+        self.update_project_management()
         return
 
     def open_project(self):
@@ -221,6 +254,7 @@ class InspectiaDialog(QDialog):
         self.openProjectPushButton.setEnabled(True)
         self.closeProjectPushButton.setEnabled(False)
         self.deleteProjectPushButton.setEnabled(True)
+        self.role_by_project_user.clear()
         if self.pgs_connection is None:
             str_msg = ("Login before")
             Tools.info_msg(str_msg)
@@ -239,6 +273,7 @@ class InspectiaDialog(QDialog):
         self.openProjectPushButton.setEnabled(False)
         self.closeProjectPushButton.setEnabled(True)
         self.deleteProjectPushButton.setEnabled(False)
+        self.update_user_management()
         return
 
     def project_definition(self,
@@ -278,18 +313,22 @@ class InspectiaDialog(QDialog):
             return
         return
 
+    def remove_role_to_user(self):
+        return
+
     def select_project(self):
         self.user_is_owner = False
         self.user_is_admin = False
         self.user_is_editor = False
         self.user_is_user = False
         project_name = self.projectComboBox.currentText()
+        self.projectRoleLineEdit.clear()
         if project_name == defs_main.NO_COMBO_SELECT:
             self.openProjectPushButton.setEnabled(False)
             self.closeProjectPushButton.setEnabled(False)
             self.newProjectPushButton.setEnabled(True)
             self.deleteProjectPushButton.setEnabled(False)
-            self.projectRolLineEdit.setEnabled(False)
+            self.projectRoleLineEdit.setEnabled(False)
             self.projectDefinitionPushButton.setEnabled(False)
         else:
             str_error, project_role = self.pgs_connection.get_project_role_by_name(project_name)
@@ -298,32 +337,78 @@ class InspectiaDialog(QDialog):
                 Tools.error_msg(str_error)
                 self.projectComboBox.setCurrentIndex(0)
                 return
-            self.projectRolLineEdit.setEnabled(True)
+            self.projectRoleLineEdit.setEnabled(True)
             self.openProjectPushButton.setEnabled(True)
             self.closeProjectPushButton.setEnabled(False)
             self.newProjectPushButton.setEnabled(False)
-            if project_role.casefold() == defs_server_api.ROL_OWNER.casefold():
+            if project_role.casefold() == defs_server_api.ROLE_OWNER.casefold():
                 self.user_is_owner = True
-            elif project_role.casefold() == defs_server_api.ROL_ADMIN.casefold():
+            elif project_role.casefold() == defs_server_api.ROLE_ADMIN.casefold():
                 self.user_is_admin = True
-            elif project_role.casefold() == defs_server_api.ROL_EDITOR.casefold():
+            elif project_role.casefold() == defs_server_api.ROLE_EDITOR.casefold():
                 self.user_is_editor = True
-            elif project_role.casefold() == defs_server_api.ROL_USER.casefold():
+            elif project_role.casefold() == defs_server_api.ROLE_USER.casefold():
                 self.user_is_user = True
             if self.user_is_owner:
                 self.deleteProjectPushButton.setEnabled(True)
-            self.projectRolLineEdit.setText(project_role)
+            self.projectRoleLineEdit.setText(project_role)
             self.projectDefinitionPushButton.setEnabled(False)
             if self.user_is_owner:
                 self.deleteProjectPushButton.setEnabled(True)
             else:
                 self.deleteProjectPushButton.setEnabled(False)
+        self.userComboBox.currentIndexChanged.disconnect(self.select_user)
+        self.userComboBox.clear()
+        self.userComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.userComboBox.setCurrentIndex(0)
+        self.roleComboBox.setCurrentIndex(0)
+        self.roleComboBox.setEnabled(False)
+        self.addRoleToUserPushButton.setEnabled(False)
+        self.removeRoleToUserPushButton.setEnabled(False)
+        self.userComboBox.currentIndexChanged.connect(self.select_user)
+        self.userComboBox.setEnabled(False)
+        self.roleComboBox.setEnabled(False)
+        if self.user_is_owner:
+            self.usersManagementGroupBox.setEnabled(True)
+        else:
+            self.usersManagementGroupBox.setEnabled(False)
+        return
+
+    def select_role(self):
+        self.addRoleToUserPushButton.setEnabled(False)
+        self.removeRoleToUserPushButton.setEnabled(False)
+        user_email = self.userComboBox.currentText()
+        user_role = self.roleComboBox.currentText()
+        if user_email in self.role_by_project_user:
+            self.removeRoleToUserPushButton.setEnabled(True)
+            self.addRoleToUserPushButton.setEnabled(False)
+        else:
+            self.removeRoleToUserPushButton.setEnabled(False)
+            self.addRoleToUserPushButton.setEnabled(True)
+        return
+
+    def select_user(self):
+        user_email = self.userComboBox.currentText()
+        self.roleComboBox.currentIndexChanged.disconnect(self.select_role)
+        self.roleComboBox.setCurrentIndex(0)
+        self.roleComboBox.setEnabled(False)
+        self.addRoleToUserPushButton.setEnabled(False)
+        self.removeRoleToUserPushButton.setEnabled(False)
+        self.roleComboBox.currentIndexChanged.connect(self.select_role)
+        if user_email == defs_main.NO_COMBO_SELECT:
+            return
+        self.roleComboBox.setEnabled(True)
+        if user_email in self.role_by_project_user:
+            role = self.role_by_project_user[user_email]
+            index = self.roleComboBox.findText(role)#, QtCore.Qt.MatchFixedString)
+            if index != -1:
+                self.roleComboBox.setCurrentIndex(index)
         return
 
     def set_qgis_iface(self, qgis_iface):
         self.qgis_iface = qgis_iface
 
-    def update_project_management_page(self):
+    def update_project_management(self):
         self.projectComboBox.currentIndexChanged.disconnect(self.select_project)
         self.projectComboBox.clear()
         self.projectComboBox.addItem(defs_main.NO_COMBO_SELECT)
@@ -337,6 +422,49 @@ class InspectiaDialog(QDialog):
                 self.projectComboBox.addItem(project_name)
         self.projectComboBox.currentIndexChanged.connect(self.select_project)
         self.select_project()
+        return
+
+    def update_user_management(self):
+        self.userComboBox.currentIndexChanged.disconnect(self.select_user)
+        self.userComboBox.clear()
+        self.userComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.userComboBox.setCurrentIndex(0)
+        self.userComboBox.setEnabled(False)
+        self.roleComboBox.setCurrentIndex(0)
+        self.roleComboBox.setEnabled(False)
+        self.addRoleToUserPushButton.setEnabled(False)
+        self.removeRoleToUserPushButton.setEnabled(False)
+        project_name = self.projectComboBox.currentText()
+        if project_name == defs_main.NO_COMBO_SELECT:
+            self.userComboBox.currentIndexChanged.connect(self.select_user)
+            return
+        str_error = self.pgs_connection.get_users()
+        if str_error:
+            str_error = ('Error getting users:\n{}'.format(str_error))
+            Tools.error_msg(str_error)
+            return
+        for db_user_email in self.pgs_connection.user_by_email:
+            if db_user_email.casefold() == self.pgs_connection.user[defs_server_api.USERS_TAG_EMAIL].casefold():
+                continue
+            self.userComboBox.addItem(db_user_email)
+        project_users = self.project.db_project[defs_server_api.PROJECT_TAG_USERS]
+        for project_user in project_users:
+            project_user_id = project_user[defs_server_api.PROJECT_TAG_USERS_ID]
+            if project_user_id == self.pgs_connection.user[defs_server_api.PROJECT_TAG_USERS_ID]:
+                continue
+            project_user_name = None
+            project_user_email = None
+            for user_email in self.pgs_connection.user_by_email:
+                if self.pgs_connection.user_by_email[user_email][defs_server_api.PROJECT_TAG_USERS_ID] == project_user_id:
+                    project_user_email = user_email
+                    project_user_name = self.pgs_connection.user_by_email[user_email][defs_server_api.USERS_TAG_NAME]
+                    break
+            if not project_user_email is None:
+                project_user_role = project_user[defs_server_api.PROJECT_TAG_USERS_ROLE]
+                self.role_by_project_user[project_user_email] = project_user_role
+        self.userComboBox.currentIndexChanged.connect(self.select_user)
+        self.userComboBox.setEnabled(True)
+        self.select_user()
         return
 
     def update_qgis(self):

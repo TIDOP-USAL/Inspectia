@@ -101,7 +101,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="projectRolLineEdit">
+          <widget class="QLineEdit" name="projectRoleLineEdit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -279,12 +279,12 @@
              </size>
             </property>
             <property name="text">
-             <string>Rol:</string>
+             <string>Role:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="3">
-           <widget class="QComboBox" name="rolComboBox">
+           <widget class="QComboBox" name="roleComboBox">
             <property name="sizePolicy">
              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -300,14 +300,14 @@
            </widget>
           </item>
           <item row="0" column="4">
-           <widget class="QPushButton" name="addRolToUserPushButton">
+           <widget class="QPushButton" name="addRoleToUserPushButton">
             <property name="text">
              <string>Add</string>
             </property>
            </widget>
           </item>
           <item row="0" column="5">
-           <widget class="QPushButton" name="removeRolToUserPushButton">
+           <widget class="QPushButton" name="removeRoleToUserPushButton">
             <property name="text">
              <string>Remove</string>
             </property>
