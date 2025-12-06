@@ -173,6 +173,12 @@ class InspectiaDialog(QDialog):
         self.roleComboBox.currentIndexChanged.connect(self.select_role)
         self.addRoleToUserPushButton.clicked.connect(self.add_role_to_user)
         self.removeRoleToUserPushButton.clicked.connect(self.remove_role_to_user)
+        self.mapViewsComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
+        self.setMapViewPushButton.clicked.connect(self.set_map_view)
+        self.removeMapViewPushButton.clicked.connect(self.remove_map_view)
+        self.updateFromMapViewPushButton.clicked.connect(self.update_map_view)
+        self.newFromMapViewPushButton.clicked.connect(self.new_map_view)
         # process_path_by_provider = {}
         # for provider in app_defs_processes.processes_providers:
         # process_path_by_provider[provider] = []
@@ -191,7 +197,9 @@ class InspectiaDialog(QDialog):
         self.toolBox.setEnabled(False)
         # self.toolBox.setItemEnabled(0, False)
         # self.toolBox.setItemEnabled(1, False)
-        return
+        # if self.qgis_iface is None:
+        #     self.locationsGroupBox.setEnabled(False)
+        # return
 
     def login(self):
         self.projectComboBox.setCurrentIndex(0)
@@ -234,6 +242,9 @@ class InspectiaDialog(QDialog):
         # self.toolBox.setItemEnabled(0, True)
         self.update_project_management()
         self.toolBox.setCurrentIndex(0)
+        return
+
+    def new_map_view(self):
         return
 
     def new_project(self):
@@ -280,7 +291,13 @@ class InspectiaDialog(QDialog):
         self.openProjectPushButton.setEnabled(False)
         self.closeProjectPushButton.setEnabled(True)
         self.deleteProjectPushButton.setEnabled(False)
-        self.update_user_management()
+        if self.user_is_owner or self.user_is_admin:
+            self.usersManagementGroupBox.setEnabled(True)
+            self.update_user_management()
+        else:
+            self.usersManagementGroupBox.setEnabled(False)
+        self.locationsGroupBox.setEnabled(True)
+        self.update_map_views()
         return
 
     def project_definition(self,
@@ -320,6 +337,9 @@ class InspectiaDialog(QDialog):
             return
         return
 
+    def remove_map_view(self):
+        return
+
     def remove_role_to_user(self):
         str_error = ''
         project_id = self.project.db_project[defs_server_api.PROJECT_TAG_ID]
@@ -342,6 +362,9 @@ class InspectiaDialog(QDialog):
             return str_error
         self.update_user_management()
         return str_error
+
+    def select_map_view(self):
+        return
 
     def select_project(self):
         self.user_is_owner = False
@@ -395,10 +418,18 @@ class InspectiaDialog(QDialog):
         self.userComboBox.currentIndexChanged.connect(self.select_user)
         self.userComboBox.setEnabled(False)
         self.roleComboBox.setEnabled(False)
-        if self.user_is_owner or self.user_is_admin:
-            self.usersManagementGroupBox.setEnabled(True)
-        else:
-            self.usersManagementGroupBox.setEnabled(False)
+        self.usersManagementGroupBox.setEnabled(False)
+        self.mapViewsComboBox.currentIndexChanged.disconnect(self.select_map_view)
+        self.mapViewsComboBox.clear()
+        self.mapViewsComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.mapViewsComboBox.setCurrentIndex(0)
+        self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
+        self.setMapViewPushButton.setEnabled(False)
+        self.removeMapViewPushButton.setEnabled(False)
+        self.updateFromMapViewPushButton.setEnabled(False)
+        self.newFromMapViewPushButton.setEnabled(False)
+        self.mapViewsComboBox.setEnabled(False)
+        self.locationsGroupBox.setEnabled(False)
         return
 
     def select_role(self):
@@ -432,8 +463,35 @@ class InspectiaDialog(QDialog):
                 self.roleComboBox.setCurrentIndex(index)
         return
 
+    def set_map_view(self):
+        return
+
     def set_qgis_iface(self, qgis_iface):
         self.qgis_iface = qgis_iface
+
+    def update_map_view(self):
+        return
+
+    def update_map_views(self):
+        self.mapViewsComboBox.currentIndexChanged.disconnect(self.select_map_view)
+        self.mapViewsComboBox.clear()
+        self.mapViewsComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.mapViewsComboBox.setCurrentIndex(0)
+        self.mapViewsComboBox.setEnabled(False)
+        self.setMapViewPushButton.setEnabled(False)
+        self.removeMapViewPushButton.setEnabled(False)
+        self.updateFromMapViewPushButton.setEnabled(False)
+        self.newFromMapViewPushButton.setEnabled(False)
+        project_name = self.projectComboBox.currentText()
+        if project_name == defs_main.NO_COMBO_SELECT:
+            self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
+            return
+        str_error = self.project.load_map_views()
+        map_views_names = self.project.get_map_views()
+        for map_view_name in map_views_names:
+            self.mapViewsComboBox.addItem(map_view_name)
+        self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
+        return
 
     def update_project_management(self):
         self.projectComboBox.currentIndexChanged.disconnect(self.select_project)

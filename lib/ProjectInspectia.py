@@ -25,6 +25,7 @@ class ProjectInspectia(Project):
         super().__init__(qgis_iface, settings, crs_tools)
         self.pgs_connection = pgs_connection
         self.db_project = None
+        self.layer_name_prefix = None
         self.db_schema = ''
 
     def create(self, parent_widget = None):
@@ -88,6 +89,25 @@ class ProjectInspectia(Project):
         # self.db_schema = db_schema
         return str_error, definition_is_saved
 
+    def get_map_views(self):
+        map_views_with_prefix = self.map_views.keys()
+        map_views_without_prefix = []
+        for map_view_with_prefix in map_views_with_prefix:
+            map_view_without_prefix = map_view_with_prefix.replace(self.layer_name_prefix, '')
+            map_views_without_prefix.append(map_view_without_prefix)
+        return map_views_without_prefix
+
+    def load_map_views(self):
+        str_error = ''
+        if not defs_server_api.PROJECT_TAG_WFS_SERVICE in self.db_project:
+            str_error = ('Not exists tag: {} in db_project'.format(defs_server_api.PROJECT_TAG_WFS_SERVICE))
+            return str_error
+        wfs_service = self.db_project[defs_server_api.PROJECT_TAG_WFS_SERVICE]
+        wfs_url = wfs_service[defs_server_api.PROJECT_WFS_SERVICE_TAG_URL]
+        wfs_user = wfs_service[defs_server_api.PROJECT_WFS_SERVICE_TAG_USER]
+        wfs_password = wfs_service[defs_server_api.PROJECT_WFS_SERVICE_TAG_PASSWORD]
+        return super().load_map_views(wfs = [wfs_url, wfs_user, wfs_password])
+
     def open(self, project_name):
         str_error = ''
         str_error, db_project = self.pgs_connection.get_project_by_name(project_name)
@@ -134,6 +154,7 @@ class ProjectInspectia(Project):
         #locations
         self.db_project = db_project_data
         self.db_schema = db_schema
+        self.layer_name_prefix = self.db_schema + ':'
         return str_error
 
     def save(self):
