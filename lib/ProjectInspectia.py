@@ -155,6 +155,7 @@ class ProjectInspectia(Project):
         self.db_project = db_project_data
         self.db_schema = db_schema
         self.layer_name_prefix = self.db_schema + ':'
+        self.locations_layer_name = self.layer_name_prefix + defs_project.LOCATIONS_LAYER_NAME
         return str_error
 
     def save(self):

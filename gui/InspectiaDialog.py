@@ -364,6 +364,17 @@ class InspectiaDialog(QDialog):
         return str_error
 
     def select_map_view(self):
+        map_view = self.mapViewsComboBox.currentText()
+        if map_view == defs_main.NO_COMBO_SELECT:
+            self.updateFromMapViewPushButton.setEnabled(False)
+            self.removeMapViewPushButton.setEnabled(False)
+            self.newFromMapViewPushButton.setEnabled(True)
+            self.setMapViewPushButton.setEnabled(False)
+        else:
+            self.updateFromMapViewPushButton.setEnabled(True)
+            self.removeMapViewPushButton.setEnabled(True)
+            self.newFromMapViewPushButton.setEnabled(True)
+            self.setMapViewPushButton.setEnabled(True)
         return
 
     def select_project(self):
@@ -491,6 +502,8 @@ class InspectiaDialog(QDialog):
         for map_view_name in map_views_names:
             self.mapViewsComboBox.addItem(map_view_name)
         self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
+        self.mapViewsComboBox.setEnabled(True)
+        self.locationsGroupBox.setEnabled(True)
         return
 
     def update_project_management(self):
