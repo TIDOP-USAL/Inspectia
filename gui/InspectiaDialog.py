@@ -245,6 +245,30 @@ class InspectiaDialog(QDialog):
         return
 
     def new_map_view(self):
+        if not self.qgis_iface:
+            return
+        str_error, wkb_geometry = self.qgis_iface.get_map_canvas_wkb_geometry_in_project_crs()
+        if str_error:
+            str_error = ('Getting map canvas WKB geometry, error:\n{}'.format(str_error))
+            Tools.error_msg(str_error)
+            return
+        text, okPressed = QInputDialog.getText(self, "Location name", "Enter name:",
+                                               QLineEdit.Normal)
+        if okPressed and text != '':
+            if text in self.project.get_map_views():
+                str_error = ('Exists a previous location with name: {}'.format(text))
+                Tools.error_msg(str_error)
+                return
+            str_error = self.project.add_map_view(text, wkb_geometry)
+            if str_error:
+                Tools.error_msg(str_error)
+                return
+            # self.update_map_views(text)
+            self.update_map_views()
+        else:
+            str_error = ('You must enter a valid location name')
+            Tools.error_msg(str_error)
+            return
         return
 
     def new_project(self):
@@ -475,6 +499,26 @@ class InspectiaDialog(QDialog):
         return
 
     def set_map_view(self):
+        if not self.qgis_iface:
+            return
+        map_view_id = self.mapViewsComboBox.currentText()
+        if map_view_id == defs_main.NO_COMBO_SELECT:
+            return
+        str_error, wkb_geometry = self.project.get_map_view_wkb_geometry(map_view_id)
+        if str_error:
+            Tools.error_msg(str_error)
+            self.update_locations()
+            return
+        if not wkb_geometry:
+            str_error = ('Null geometry for location: {}'.format(map_view_id))
+            Tools.error_msg(str_error)
+            self.update_locations()
+            return
+        str_error = self.qgis_iface.set_map_canvas_from_wkb_geometry_in_project_crs(wkb_geometry)
+        if str_error:
+            Tools.error_msg(str_error)
+            self.update_locations()
+            return
         return
 
     def set_qgis_iface(self, qgis_iface):
