@@ -10,6 +10,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import (QApplication, QMessageBox, QDialog, QFileDialog, QPushButton, QComboBox,
                              QInputDialog, QLineEdit)
 from PyQt5.QtCore import QDir, QFileInfo, QFile, Qt
+from PyQt5.QtGui import QStandardItem, QColor
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_path, '..'))
@@ -104,6 +105,7 @@ class InspectiaDialog(QDialog):
     def close_project(self):
         del self.project
         self.project = None
+        self.projectComboBox.setEnabled(True)
         self.projectComboBox.setCurrentIndex(0)
         # self.projectDefinitionPushButton.setEnabled(False)
         # self.openProjectPushButton.setEnabled(True)
@@ -156,6 +158,8 @@ class InspectiaDialog(QDialog):
         self.setWindowTitle(defs_main.MAIN_WIDGET_TITLE)
         self.registerPushButton.clicked.connect(self.register)
         self.loginPushButton.clicked.connect(self.login)
+        self.logoutPushButton.clicked.connect(self.logout)
+        self.logoutPushButton.setEnabled(False)
         self.projectComboBox.addItem(defs_main.NO_COMBO_SELECT)
         self.projectRoleLineEdit.setEnabled(False)
         self.projectComboBox.currentIndexChanged.connect(self.select_project)
@@ -202,7 +206,7 @@ class InspectiaDialog(QDialog):
         # return
 
     def login(self):
-        self.projectComboBox.setCurrentIndex(0)
+        self.close_project()
         self.toolBox.setEnabled(False)
         # self.toolBox.setItemEnabled(0, False)
         title = 'Login in Inspectia'
@@ -227,9 +231,17 @@ class InspectiaDialog(QDialog):
         if str_error:
             str_error = ('Error logging:\n{}'.format(str_error))
             Tools.error_msg(str_error)
-            if self.gis_server_api_email is None:
-                self.toolBox.setItemEnabled(0, False)
-                # self.update_project_management()
+            self.gis_server_api_password = None
+            self.loginPushButton.setEnabled(True)
+            self.logoutPushButton.setEnabled(False)
+            self.registerPushButton.setEnabled(True)
+            self.close_project()
+            # self.update_project_management()
+            self.toolBox.setItemEnabled(0, False)
+            # self.update_project_management()
+            # if self.gis_server_api_email is None:
+            #     self.toolBox.setItemEnabled(0, False)
+            #     # self.update_project_management()
             return
         self.gis_server_api_url = url
         self.settings.setValue(defs_qsettings.QSETTINGS_TAG_GIS_SERVER_API_URL, self.gis_server_api_url)
@@ -242,6 +254,23 @@ class InspectiaDialog(QDialog):
         # self.toolBox.setItemEnabled(0, True)
         self.update_project_management()
         self.toolBox.setCurrentIndex(0)
+        self.loginPushButton.setEnabled(False)
+        self.logoutPushButton.setEnabled(True)
+        self.registerPushButton.setEnabled(False)
+        return
+
+    def logout(self):
+        self.gis_server_api_password = None
+        self.close_project()
+        self.projectComboBox.currentIndexChanged.disconnect(self.select_project)
+        self.projectComboBox.clear()
+        self.projectComboBox.addItem(defs_main.NO_COMBO_SELECT)
+        self.projectComboBox.currentIndexChanged.connect(self.select_project)
+        self.projectComboBox.setEnabled(False)
+        self.newProjectPushButton.setEnabled(False)
+        self.loginPushButton.setEnabled(True)
+        self.logoutPushButton.setEnabled(False)
+        self.registerPushButton.setEnabled(True)
         return
 
     def new_map_view(self):
@@ -311,6 +340,7 @@ class InspectiaDialog(QDialog):
             str_error = ('Error creating project:\n{}'.format(str_error))
             Tools.info_msg(str_error)
             return
+        self.projectComboBox.setEnabled(False)
         self.projectDefinitionPushButton.setEnabled(True)
         self.openProjectPushButton.setEnabled(False)
         self.closeProjectPushButton.setEnabled(True)
@@ -568,7 +598,11 @@ class InspectiaDialog(QDialog):
             return
         str_error = self.project.load_map_views()
         map_views_names = self.project.get_map_views()
+        map_views_names_to_add_as_list = []
         for map_view_name in map_views_names:
+            map_views_names_to_add_as_list.append(map_view_name)
+        map_views_names_to_add_as_list.sort()
+        for map_view_name in map_views_names_to_add_as_list:
             self.mapViewsComboBox.addItem(map_view_name)
         self.mapViewsComboBox.currentIndexChanged.connect(self.select_map_view)
         self.mapViewsComboBox.setEnabled(True)
@@ -586,7 +620,11 @@ class InspectiaDialog(QDialog):
             Tools.error_msg(str_error)
             return
         if self.toolBox.isItemEnabled(0):
+            project_names_to_add_as_list = []
             for project_name in project_names:
+                project_names_to_add_as_list.append(project_name)
+            project_names_to_add_as_list.sort()
+            for project_name in project_names_to_add_as_list:
                 self.projectComboBox.addItem(project_name)
         self.projectComboBox.currentIndexChanged.connect(self.select_project)
         self.select_project()
@@ -612,10 +650,6 @@ class InspectiaDialog(QDialog):
             str_error = ('Error getting users:\n{}'.format(str_error))
             Tools.error_msg(str_error)
             return
-        for db_user_email in self.pgs_connection.user_by_email:
-            if db_user_email.casefold() == self.pgs_connection.user[defs_server_api.USERS_TAG_EMAIL].casefold():
-                continue
-            self.userComboBox.addItem(db_user_email)
         project_users = self.project.db_project[defs_server_api.PROJECT_TAG_USERS]
         for project_user in project_users:
             project_user_id = project_user[defs_server_api.PROJECT_TAG_USERS_ID]
@@ -631,6 +665,29 @@ class InspectiaDialog(QDialog):
             if not project_user_email is None:
                 project_user_role = project_user[defs_server_api.PROJECT_TAG_USERS_ROLE]
                 self.role_by_project_user[project_user_email] = project_user_role
+        users_emails_to_add_as_list = []
+        for db_user_email in self.pgs_connection.user_by_email:
+            if db_user_email.casefold() == self.pgs_connection.user[defs_server_api.USERS_TAG_EMAIL].casefold():
+                continue
+            users_emails_to_add_as_list.append(db_user_email)
+        users_emails_to_add_as_list.sort()
+        userComboBoxModel = self.userComboBox.model()
+        # item = self.combo.model().item(row)
+        # item.setData(None, Qt.ForegroundRole)
+        for db_user_email in users_emails_to_add_as_list:
+            # if db_user_email.casefold() == self.pgs_connection.user[defs_server_api.USERS_TAG_EMAIL].casefold():
+            #     continue
+            if db_user_email in self.role_by_project_user:
+                item = QStandardItem(db_user_email)
+                item.setForeground(QColor('red'))
+                # self.userComboBox.addItem(item)
+                userComboBoxModel.appendRow(item)
+            else:
+                item = QStandardItem(db_user_email)
+                item.setForeground(QColor('green'))
+                # self.userComboBox.addItem(item)
+                userComboBoxModel.appendRow(item)
+            # item.setBackground(QBrush(QColorConstants.Red))
         self.userComboBox.currentIndexChanged.connect(self.select_user)
         self.userComboBox.setEnabled(True)
         self.select_user()

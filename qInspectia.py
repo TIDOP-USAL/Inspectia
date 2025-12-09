@@ -61,15 +61,15 @@ from Inspectia.lib.QGisIFaceInspectia import QGisIFaceInspectia
 # sys.path.append("C:\\Program Files\\JetBrains\\PyCharm 2025.2.0.1\\debug-eggs\\pydevd-pycharm.egg")  # dhl
 # import pydevd_pycharm
 
-sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
-import pydevd
+# sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
+# import pydevd
 
 class qInspectia(object):
 
     def __init__(self, iface):
 
         # pydevd.settrace('localhost', port=54000)
-        pydevd.settrace('localhost', port=54100, stdoutToServer=True, stderrToServer=True)
+        # pydevd.settrace('localhost', port=54100, stdoutToServer=True, stderrToServer=True)
 
         self.projVersionMajor = projVersionMajor
         self.path_plugin = pluginPath
