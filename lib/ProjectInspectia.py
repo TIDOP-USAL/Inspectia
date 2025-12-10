@@ -17,6 +17,8 @@ sys.path.append(common_libs_absolute_path)
 from pyLibProject.defs import defs_project_definition
 from pyLibProject.lib.Project import Project
 from pyLibProject.defs import defs_project
+from pyLibProject.defs import defs_layers_groups
+from pyLibProject.defs import defs_layers
 from pyLibGisApi.lib.PostGISServerAPI import PostGISServerConnection
 from pyLibGisApi.defs import defs_server_api
 
@@ -103,6 +105,21 @@ class ProjectInspectia(Project):
             return str_error, definition_is_saved
         # self.db_project = db_project
         # self.db_schema = db_schema
+
+        # create layers_groups
+        for layers_group_name in defs_layers_groups.fields_by_layers_group:
+            layers_group = defs_layers_groups.fields_by_layers_group[layers_group_name]
+            layers_group_name = layers_group[defs_layers_groups.LAYERS_GROUP_FIELD_NAME]
+            str_error = self.pgs_connection.create_layers_group(project_id, layers_group)
+            if str_error:
+                str_error = ('In project: {}\ncreating layers group: {}\nerror:\n{}'
+                             .format(project_name, layers_group_name, str_error))
+                return str_error, definition_is_saved
+        yo = 1
+
+        # publish layers
+
+
         return str_error, definition_is_saved
 
     def get_map_views(self):

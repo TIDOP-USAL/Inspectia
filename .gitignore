@@ -4,6 +4,7 @@
 **/__pycache__
 **/.__pycache__/
 **/tmp/
+**/.vscode/
 
 **/*.svn-base
 **/.svn
