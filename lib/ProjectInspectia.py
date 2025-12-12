@@ -110,15 +110,29 @@ class ProjectInspectia(Project):
         for layers_group_name in defs_layers_groups.fields_by_layers_group:
             layers_group = defs_layers_groups.fields_by_layers_group[layers_group_name]
             layers_group_name = layers_group[defs_layers_groups.LAYERS_GROUP_FIELD_NAME]
-            str_error = self.pgs_connection.create_layers_group(project_id, layers_group)
-            if str_error:
-                str_error = ('In project: {}\ncreating layers group: {}\nerror:\n{}'
-                             .format(project_name, layers_group_name, str_error))
-                return str_error, definition_is_saved
-        yo = 1
+            layers_group_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id, layers_group_name)
+            if layers_group_db_id is None:
+                str_error = self.pgs_connection.create_layers_group(project_id, layers_group)
+                if str_error:
+                    str_error = ('In project: {}\ncreating layers group: {}\nerror:\n{}'
+                                 .format(project_name, layers_group_name, str_error))
+                    return str_error, definition_is_saved
 
         # publish layers
+        for layer_name in defs_layers.fields_by_layer:
+            layer = defs_layers.fields_by_layer[layer_name]
+            layer_table_name = layer[defs_layers.LAYER_FIELD_TABLE_NAME]
+            layer_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id, layer_table_name)
+            # if layers_group_db_id is None:
+            #     sld_file_path = None
+            #     sld_by_layer[LOCATIONS_LAYER_NAME]
+            #     str_error = self.pgs_connection.create_layer(project_id, layers_group)
+            #     if str_error:
+            #         str_error = ('In project: {}\ncreating layers group: {}\nerror:\n{}'
+            #                      .format(project_name, layers_group_name, str_error))
+            #         return str_error, definition_is_saved
 
+        yo = 1
 
         return str_error, definition_is_saved
 
