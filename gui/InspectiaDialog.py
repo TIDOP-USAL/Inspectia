@@ -243,6 +243,7 @@ class InspectiaDialog(QDialog):
             #     self.toolBox.setItemEnabled(0, False)
             #     # self.update_project_management()
             return
+        self.toolBox.setItemEnabled(0, True)
         self.gis_server_api_url = url
         self.settings.setValue(defs_qsettings.QSETTINGS_TAG_GIS_SERVER_API_URL, self.gis_server_api_url)
         self.gis_server_api_email = email

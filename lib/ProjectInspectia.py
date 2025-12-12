@@ -110,7 +110,7 @@ class ProjectInspectia(Project):
         for layers_group_name in defs_layers_groups.fields_by_layers_group:
             layers_group = defs_layers_groups.fields_by_layers_group[layers_group_name]
             layers_group_name = layers_group[defs_layers_groups.LAYERS_GROUP_FIELD_NAME]
-            layers_group_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id, layers_group_name)
+            str_error, layers_group_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id, layers_group_name)
             if layers_group_db_id is None:
                 str_error = self.pgs_connection.create_layers_group(project_id, layers_group)
                 if str_error:
@@ -122,18 +122,41 @@ class ProjectInspectia(Project):
         for layer_name in defs_layers.fields_by_layer:
             layer = defs_layers.fields_by_layer[layer_name]
             layer_table_name = layer[defs_layers.LAYER_FIELD_TABLE_NAME]
-            layer_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id, layer_table_name)
-            # if layers_group_db_id is None:
-            #     sld_file_path = None
-            #     sld_by_layer[LOCATIONS_LAYER_NAME]
-            #     str_error = self.pgs_connection.create_layer(project_id, layers_group)
-            #     if str_error:
-            #         str_error = ('In project: {}\ncreating layers group: {}\nerror:\n{}'
-            #                      .format(project_name, layers_group_name, str_error))
-            #         return str_error, definition_is_saved
-
-        yo = 1
-
+            str_error, layer_db_id = self.pgs_connection.get_layer_id_by_table_name(project_id, layer_table_name)
+            if layer_db_id is None:
+                sld_content = None
+                if layer_table_name in defs_project.sld_file_path_by_layer:
+                    sld_file_path = defs_project.sld_file_path_by_layer[layer_table_name]
+                    if os.path.exists(sld_file_path):
+                        str_error = ''
+                        try:
+                            with open(sld_file_path, 'r') as f:
+                                sld_content = f.read()
+                        except IOError as e:
+                            str_error = ('Reading SLD file:\n{}\nI/O error({}): {}'
+                                         .format(sld_file_path, e.errno, e.strerror))
+                        except:  # handle other exceptions such as attribute errors
+                            str_error = ('Reading SLD file:\n{}\nUnexpected error: {}'
+                                         .format(sld_file_path, sys.exc_info()[0]))
+                        if str_error:
+                            str_error = ('In project: {}\ncreating layer: {}\nerror:\n{}'
+                                         .format(project_name, layer_table_name, str_error))
+                            return str_error, definition_is_saved
+                if sld_content:
+                    sld_content = sld_content.replace('"', '\\"')
+                    layer[defs_layers.LAYER_SLD_CONTENT] = sld_content
+                layers_group_db_id = None
+                if layer_table_name in defs_layers.layers_group_name_by_layer:
+                    layers_group_name = defs_layers.layers_group_name_by_layer[layer_table_name]
+                    str_error, layers_group_db_id = self.pgs_connection.get_layers_group_id_by_name(project_id,
+                                                                                                    layers_group_name)
+                if layers_group_db_id is not None:
+                    layer[defs_layers.LAYERS_GROUP_ID] = layers_group_db_id
+                str_error = self.pgs_connection.create_layer(project_id, layer)
+                if str_error:
+                    str_error = ('In project: {}\ncreating layer: {}\nerror:\n{}'
+                                 .format(project_name, layer_table_name, str_error))
+                    return str_error, definition_is_saved
         return str_error, definition_is_saved
 
     def get_map_views(self):
