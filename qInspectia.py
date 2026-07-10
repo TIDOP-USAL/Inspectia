@@ -54,7 +54,7 @@ sys.path.append(os.path.join(current_path, '..'))
 # Import the code for the dialog
 from Inspectia.gui.InspectiaDialog import InspectiaDialog
 from Inspectia.defs import defs_main
-from Inspectia.lib.QGisIFaceInspectia import QGisIFaceInspectia
+from Inspectia.QGisIFaceInspectia import QGisIFaceInspectia
 
 # # sys.path.append("C:\Program Files\JetBrains\PyCharm 2020.3\debug-eggs\pydevd-pycharm.egg") # dhl
 # sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
@@ -63,6 +63,8 @@ from Inspectia.lib.QGisIFaceInspectia import QGisIFaceInspectia
 
 # sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
 # import pydevd
+sys.path.append("C:/Program Files/JetBrains/PyCharm 2026.1.4/debug-eggs/pydevd-pycharm.egg")  # dhl
+import pydevd_pycharm
 
 class qInspectia(object):
 
@@ -70,6 +72,8 @@ class qInspectia(object):
 
         # pydevd.settrace('localhost', port=54000)
         # pydevd.settrace('localhost', port=54100, stdoutToServer=True, stderrToServer=True)
+        # pydevd_pycharm.settrace('localhost',port=54100, stdoutToServer=True, stderrToServer=True) # old
+        # pydevd_pycharm.settrace('localhost',port=54100, stdout_to_server=True, stderr_to_server=True)
 
         self.projVersionMajor = projVersionMajor
         self.path_plugin = pluginPath

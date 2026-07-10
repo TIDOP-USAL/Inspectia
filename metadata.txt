@@ -1,6 +1,7 @@
 [general]
 name=qInspectia
-qgisMinimumVersion=3.40.0
+qgisMinimumVersion=3.40.10
+qgisMaximumVersion=3.40.10
 description=A plugin to use in QGIS ...
 version=0.1
 author=David Hernandez Lopez, Universidad de Castilla-La Mancha
