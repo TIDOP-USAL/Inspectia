@@ -8,7 +8,7 @@ import xmltodict
 current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_path, '..'))
 
-from PyQt5.QtCore import QDir, QFileInfo, QFile, QDate, QDateTime
+from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, QDate, QDateTime
 
 from Inspectia.defs import defs_paths
 from Inspectia.defs import defs_pgLayersManagement
