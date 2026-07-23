@@ -3,28 +3,20 @@
 
 import os, sys
 import json
-import xmltodict
-
-current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_path, '..'))
 
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, QDate, QDateTime
 
-from Inspectia.defs import defs_paths
-from Inspectia.defs import defs_pgLayersManagement
-common_libs_absolute_path = os.path.join(current_path, defs_paths.COMMON_LIBS_RELATIVE_PATH)
-sys.path.append(common_libs_absolute_path)
-
+from defs import defs_pgLayersManagement
 from pyLibProject.defs import defs_project_definition
-from pyLibProject.lib.Project import Project
+from pyLibProject.core.Project import Project
 from pyLibProject.defs import defs_project
 from pyLibProject.defs import defs_layers_groups
 from pyLibProject.defs import defs_layers
-from pyLibGisApi.lib.PostGISServerAPI import PostGISServerAPI
+from pyLibGisApi.core.PostGISServerAPI import PostGISServerAPI
 from pyLibGisApi.defs import defs_server_api
 from pyLibProcesses.defs import defs_project as processes_defs_project
 from pyLibProcesses.defs import defs_processes as processes_defs_processes
-from Inspectia.gui.PostgisLayersManagementDialog import PostgisLayersManagementDialog
+from gui import PostgisLayersManagementDialog
 
 class ProjectInspectia(Project):
     def __init__(self, qgis_iface, settings, crs_tools, pgs_connection, data_model):

@@ -44,7 +44,7 @@ projVersionMajor = osr.GetPROJVersionMajor()
 pluginsPath = QFileInfo(QgsApplication.qgisUserDatabaseFilePath()).path()
 pluginPath = os.path.dirname(os.path.realpath(__file__))
 pluginPath = os.path.join(pluginsPath, pluginPath)
-libPath = os.path.join(pluginPath, 'lib')
+libPath = os.path.join(pluginPath, 'core')
 # existsPluginPath = QDir(libPath).exists()
 sys.path.append(pluginPath)
 sys.path.append(libPath)
@@ -52,9 +52,9 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_path, '..'))
 
 # Import the code for the dialog
-from Inspectia.gui.InspectiaDialog import InspectiaDialog
-from Inspectia.defs import defs_main
-from Inspectia.QGisIFaceInspectia import QGisIFaceInspectia
+from gui import InspectiaDialog
+from defs import defs_main
+import QGisIFaceInspectia
 
 # # sys.path.append("C:\Program Files\JetBrains\PyCharm 2020.3\debug-eggs\pydevd-pycharm.egg") # dhl
 # sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
@@ -63,8 +63,8 @@ from Inspectia.QGisIFaceInspectia import QGisIFaceInspectia
 
 # sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
 # import pydevd
-sys.path.append("C:/Program Files/JetBrains/PyCharm 2026.1.4/debug-eggs/pydevd-pycharm.egg")  # dhl
-import pydevd_pycharm
+# sys.path.append("C:/Program Files/JetBrains/PyCharm 2026.1.4/debug-eggs/pydevd-pycharm.egg")  # dhl
+# import pydevd_pycharm
 
 class qInspectia(object):
 

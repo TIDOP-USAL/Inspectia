@@ -2,18 +2,7 @@
 # David Hernandez Lopez, david.hernandez@uclm.es
 
 import os
-import sys
-import math
-import json
-import copy
 import pathlib
-
-current_path = os.path.dirname(os.path.realpath(__file__))
-# current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_path, '..'))
-sys.path.append(os.path.join(current_path, '../..'))
-# sys.path.insert(0, '..')
-# sys.path.insert(0, '../..')
 
 from PyQt5 import QtCore, QtWidgets
 from qgis.PyQt.uic import loadUi
@@ -21,14 +10,8 @@ from qgis.PyQt.QtWidgets import (QApplication, QMessageBox, QDialog, QInputDialo
                              QFileDialog, QPushButton, QComboBox, QPlainTextEdit, QLineEdit, QDateEdit,
                              QDialogButtonBox, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QAbstractItemView)
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, QSize, Qt, QDate
-from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem
 
-from pyLibQtTools import Tools
-from pyLibQtTools.Tools import SimpleTextEditDialog
-from pyLibQtTools.CalendarDialog import CalendarDialog
-from pyLibProject.defs import defs_project_definition
-from pyLibGisApi.defs import defs_server_api
-from Inspectia.defs import defs_pgLayersManagement as defs_pglm
+from defs import defs_pgLayersManagement as defs_pglm
 from pyLibGisApi.defs import defs_server_api
 
 class PostgisLayersManagementDialog(QDialog):

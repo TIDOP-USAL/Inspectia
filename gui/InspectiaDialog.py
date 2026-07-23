@@ -1,11 +1,8 @@
 # authors:
 # David Hernandez Lopez, david.hernandez@uclm.es
 
-import os, sys
-import shutil
-import pathlib
+import os
 import json
-import copy
 
 from qgis.PyQt.uic import loadUi
 from qgis.PyQt.QtWidgets import (QApplication, QMessageBox, QDialog, QFileDialog, QPushButton, QComboBox,
@@ -13,23 +10,11 @@ from qgis.PyQt.QtWidgets import (QApplication, QMessageBox, QDialog, QFileDialog
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, Qt
 from qgis.PyQt.QtGui import QStandardItem, QColor
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(os.path.join(current_path, '..'))
-sys.path.append(os.path.join(current_path, '../..'))
-# sys.path.insert(0, '..')
-# sys.path.insert(0, '../..')
+from defs import defs_main
+from defs import defs_qsettings
+from defs import defs_processes as app_defs_processes
+from core.ProjectInspectia import ProjectInspectia
 
-from Inspectia.defs import defs_paths
-from Inspectia.defs import defs_main
-from Inspectia.defs import defs_qsettings
-from Inspectia.defs import defs_processes as app_defs_processes
-
-common_libs_absolute_path = os.path.join(current_path, defs_paths.COMMON_LIBS_RELATIVE_PATH)
-sys.path.append(common_libs_absolute_path)
-
-from Inspectia.lib.ProjectInspectia import ProjectInspectia
-
-from pyLibCRSs import CRSsDefines as defs_crs
 from pyLibCRSs.CRSsTools import CRSsTools
 from pyLibProcesses.defs import defs_processes
 from pyLibProcesses.defs import defs_project as processes_defs_project
@@ -38,17 +23,13 @@ from pyLibProcesses.gui.ProcessesManagerDialog import ProcessesManagerDialog
 from pyLibProcesses.gui.ProjectProcessesDialog import ProjectProcessesDialog
 from pyLibQtTools import Tools
 from pyLibQtTools.LoginDialog import LoginDialog
-from pyLibGisApi.lib.PostGISServerAPI import PostGISServerAPI
+from pyLibGisApi.core.PostGISServerAPI import PostGISServerAPI
 from pyLibGisApi.defs import defs_server_api
-from pyLibGisApi.defs import defs_processes as postgis_api_defs_processes
 from pyLibQtTools.Tools import SimpleTextEditDialog
 from pyLibParameters import defs_pars
-from pyLibParameters.ParametersManager import ParametersManager
 from pyLibParameters.ui_qt.ParametersManagerDialog import ParametersManagerDialog
 from pyLibQtTools.QProcessDialog import QProcessDialog
 from pyLibQtTools import defs_qprocess
-# from pyLibQtTools.multipleFileSelectorDialog.multiple_file_selector_dialog import MultipleFileSelectorDialog
-
 
 class InspectiaDialog(QDialog):
     """Employee dialog."""
