@@ -1,7 +1,7 @@
 # authors:
 # David Hernandez Lopez, david.hernandez@uclm.es
 
-from pyLibGisApi.defs import defs_server_api
+from pyLibGisApi import defs_server_api
 
 PG_LAYERS_MANAGEMENT_DIALOG_TITLE = 'PostGIS Layers Management'
 STYLE_LABEL = 'Style'

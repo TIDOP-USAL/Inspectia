@@ -8,8 +8,8 @@ from qgis.PyQt.QtWidgets import QApplication
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 
-from gui.InspectiaDialog import InspectiaDialog
-from defs import defs_main
+from inspectia_gui.InspectiaDialog import InspectiaDialog
+from inspectia_defs import defs_main
 
 def main():
     app = QApplication(sys.argv)

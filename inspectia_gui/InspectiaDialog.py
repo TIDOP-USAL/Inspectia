@@ -10,26 +10,25 @@ from qgis.PyQt.QtWidgets import (QApplication, QMessageBox, QDialog, QFileDialog
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, Qt
 from qgis.PyQt.QtGui import QStandardItem, QColor
 
-from defs import defs_main
-from defs import defs_qsettings
-from defs import defs_processes as app_defs_processes
-from core.ProjectInspectia import ProjectInspectia
-
-from pyLibCRSs.CRSsTools import CRSsTools
-from pyLibProcesses.defs import defs_processes
-from pyLibProcesses.defs import defs_project as processes_defs_project
-from pyLibProcesses.ProcessesManager import ProcessesManager
-from pyLibProcesses.gui.ProcessesManagerDialog import ProcessesManagerDialog
-from pyLibProcesses.gui.ProjectProcessesDialog import ProjectProcessesDialog
-from pyLibQtTools import Tools
-from pyLibQtTools.LoginDialog import LoginDialog
-from pyLibGisApi.core.PostGISServerAPI import PostGISServerAPI
-from pyLibGisApi.defs import defs_server_api
-from pyLibQtTools.Tools import SimpleTextEditDialog
+from pyLibCRSs import CRSsTools
+from pyLibProcesses import defs_processes
+from pyLibProcesses import defs_project as processes_defs_project
+from pyLibProcesses import ProcessesManager
+from pyLibProcesses import ProcessesManagerDialog
+from pyLibProcesses import ProjectProcessesDialog
+from pyLibQtTools import error_msg, info_msg, SimpleTextEditDialog
+from pyLibQtTools import LoginDialog
+from pyLibGisApi import PostGISServerAPI
+from pyLibGisApi import defs_server_api
 from pyLibParameters import defs_pars
-from pyLibParameters.ui_qt.ParametersManagerDialog import ParametersManagerDialog
-from pyLibQtTools.QProcessDialog import QProcessDialog
+from pyLibParameters import ParametersManagerDialog
+from pyLibQtTools import QProcessDialog
 from pyLibQtTools import defs_qprocess
+
+from inspectia_defs import defs_main
+from inspectia_defs import defs_qsettings
+from inspectia_defs import defs_processes as app_defs_processes
+from inspectia_core.ProjectInspectia import ProjectInspectia
 
 class InspectiaDialog(QDialog):
     """Employee dialog."""
@@ -107,7 +106,7 @@ class InspectiaDialog(QDialog):
     def delete_project(self):
         if self.pgs_connection is None:
             str_msg = ("Login before")
-            Tools.info_msg(str_msg)
+            info_msg(str_msg)
             return
         project_name = self.projectComboBox.currentText()
         if not self.project is None:
@@ -116,7 +115,7 @@ class InspectiaDialog(QDialog):
         str_error = self.pgs_connection.delete_project_by_name(project_name)
         if str_error:
             str_error = ('Deleting project: {}, error:\n{}'.format(project_name, str_error))
-            Tools.info_msg(str_error)
+            info_msg(str_error)
             return
         self.update_project_management()
         return
@@ -140,7 +139,7 @@ class InspectiaDialog(QDialog):
         # processes_manager = ProcessesManager()
         # str_error = processes_manager.initialize(process_path_by_provider)
         # if str_error:
-        #     Tools.error_msg(str_error)
+        #     error_msg(str_error)
         #     return
         # self.processes_manager = processes_manager
         # self.processesManagerPushButton.clicked.connect(self.select_processes_manager_gui)
@@ -148,7 +147,7 @@ class InspectiaDialog(QDialog):
         str_error = processes_manager.initialize(app_defs_processes.process_path_by_provider,
                                                  app_defs_processes.ignored_process_name_by_provider)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         self.processes_manager = processes_manager
         self.processesManagerPushButton.clicked.connect(self.select_processes_manager_gui)
@@ -242,16 +241,16 @@ class InspectiaDialog(QDialog):
     def pg_layers_management(self):
         if self.pgs_connection is None:
             str_msg = ("Login before")
-            Tools.info_msg(str_msg)
+            info_msg(str_msg)
             return
         if not self.project:
             str_error = ('Not exists project')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return False
         str_error = self.project.pg_layers_management(self)
         if str_error:
             str_error = ('PostGIS layers management, error:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return False
         return
 
@@ -268,7 +267,7 @@ class InspectiaDialog(QDialog):
         dialog_result = dialog.exec()
         if not dialog_result == QDialog.Accepted:
             str_error = ('Not logged')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             if self.gis_server_api_email is None:
                 self.toolBox.setItemEnabled(0, False)
                 self.update_project_management()
@@ -280,7 +279,7 @@ class InspectiaDialog(QDialog):
         # str_error = self.project.login(url, username, password)
         if str_error:
             str_error = ('Error logging:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.gis_server_api_password = None
             self.loginPushButton.setEnabled(True)
             self.logoutPushButton.setEnabled(False)
@@ -296,7 +295,7 @@ class InspectiaDialog(QDialog):
         str_error, self.data_model = self.pgs_connection.get_data_model(self.pgs_data_model_name)
         if str_error:
             str_error = ('Not exists Inspectia data model')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.gis_server_api_password = None
             self.loginPushButton.setEnabled(True)
             self.logoutPushButton.setEnabled(False)
@@ -317,7 +316,7 @@ class InspectiaDialog(QDialog):
         # str_error = self.pgs_connection.create_data_model(new_data_model)
         # if str_error:
         #     str_error = ('Creating data model: {}\nError:\n{}'.format(data_model_new_name, str_error))
-        #     Tools.error_msg(str_error)
+        #     error_msg(str_error)
         #     self.gis_server_api_password = None
         #     self.loginPushButton.setEnabled(True)
         #     self.logoutPushButton.setEnabled(False)
@@ -338,7 +337,7 @@ class InspectiaDialog(QDialog):
         # if str_error:
         #     str_error = ('Updating data model: {}\nError:\n{}'
         #                  .format(updated_data_model_new_name, str_error))
-        #     Tools.error_msg(str_error)
+        #     error_msg(str_error)
         #     self.gis_server_api_password = None
         #     self.loginPushButton.setEnabled(True)
         #     self.logoutPushButton.setEnabled(False)
@@ -357,7 +356,7 @@ class InspectiaDialog(QDialog):
         # if str_error:
         #     str_error = ('Updating data model: {}\nError:\n{}'
         #                  .format(updated_data_model_new_name, str_error))
-        #     Tools.error_msg(str_error)
+        #     error_msg(str_error)
         #     self.gis_server_api_password = None
         #     self.loginPushButton.setEnabled(True)
         #     self.logoutPushButton.setEnabled(False)
@@ -414,31 +413,31 @@ class InspectiaDialog(QDialog):
         str_error, wkb_geometry = self.qgis_iface.get_map_canvas_wkb_geometry_in_project_crs()
         if str_error:
             str_error = ('Getting map canvas WKB geometry, error:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         text, okPressed = QInputDialog.getText(self, "Location name", "Enter name:",
                                                QLineEdit.Normal)
         if okPressed and text != '':
             if text in self.project.get_map_views():
                 str_error = ('Exists a previous location with name: {}'.format(text))
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 return
             str_error = self.project.add_map_view(text, wkb_geometry)
             if str_error:
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 return
             # self.update_map_views(text)
             self.update_map_views()
         else:
             str_error = ('You must enter a valid location name')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         return
 
     def new_project(self):
         if self.pgs_connection is None:
             str_msg = ("Login before")
-            Tools.info_msg(str_msg)
+            info_msg(str_msg)
             return
         if not self.project is None:
             del self.project
@@ -448,7 +447,7 @@ class InspectiaDialog(QDialog):
         str_error, definition_is_saved = self.project.create(self)
         if str_error:
             str_error = ('Error creating project:\n{}'.format(str_error))
-            Tools.info_msg(str_error)
+            info_msg(str_error)
             return
         if not definition_is_saved:
             del self.project
@@ -469,7 +468,7 @@ class InspectiaDialog(QDialog):
         self.role_by_project_user.clear()
         if self.pgs_connection is None:
             str_msg = ("Login before")
-            Tools.info_msg(str_msg)
+            info_msg(str_msg)
             return
         if not self.project is None:
             del self.project
@@ -480,7 +479,7 @@ class InspectiaDialog(QDialog):
         str_error = self.project.open(project_name)
         if str_error:
             str_error = ('Error creating project:\n{}'.format(str_error))
-            Tools.info_msg(str_error)
+            info_msg(str_error)
             return
         self.projectComboBox.setEnabled(False)
         self.projectDefinitionPushButton.setEnabled(True)
@@ -585,27 +584,27 @@ class InspectiaDialog(QDialog):
     def process_run(self):
         if not self.project:
             str_error = ('Not exists project')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return False
         project_id = self.project.db_project[defs_server_api.PROJECT_TAG_ID]
         if not self.process_author_value:
             msg = ("Input process author")
-            Tools.info_msg(msg)
+            info_msg(msg)
             return
         if not self.process_description_value:
             msg = ("Input process description")
-            Tools.info_msg(msg)
+            info_msg(msg)
             return
         if not self.process_label_value:
             msg = ("Input process label")
-            Tools.info_msg(msg)
+            info_msg(msg)
             return
         if self.process_label_value in self.project.process_by_label:
             msg = ("Exists another process with label: {}".format(self.process_label_value))
             msg += ("\nChange the label for new process,")
             msg += ("\nchange the label in the existing process ")
             msg += ("\nor remove the existing process")
-            Tools.info_msg(msg)
+            info_msg(msg)
             return
         process_name = self.processComboBox.currentText()
         if process_name == defs_main.NO_COMBO_SELECT:
@@ -621,7 +620,7 @@ class InspectiaDialog(QDialog):
         str_error, output_arguments = self.processes_manager.get_process_output_arguments(process_provider,
                                                                                           process_name)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         output_as_json_str = json.dumps(output_arguments)
         process_log = None
@@ -631,12 +630,12 @@ class InspectiaDialog(QDialog):
             if not defs_processes.PROCESS_SRC_ATTRIBUTE_CLASS in process[defs_processes.PROCESS_FIELD_SRC]:
                 msg = ("Not exists {} attribute in src".format(defs_processes.PROCESS_SRC_ATTRIBUTE_CLASS))
                 msg += ("\nfor proccess: {}".format(process_name))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             if not defs_processes.PROCESS_SRC_ATTRIBUTE_METHOD in process[defs_processes.PROCESS_FIELD_SRC]:
                 msg = ("Not exists {} attribute in src".format(defs_processes.PROCESS_SRC_ATTRIBUTE_METHOD))
                 msg += ("\nfor proccess: {}".format(process_name))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             object_fully_qualified_name = process[defs_processes.PROCESS_FIELD_SRC][defs_processes.PROCESS_SRC_ATTRIBUTE_CLASS]
             object_method_name = process[defs_processes.PROCESS_FIELD_SRC][defs_processes.PROCESS_SRC_ATTRIBUTE_METHOD]
@@ -645,13 +644,13 @@ class InspectiaDialog(QDialog):
             if not object_fully_qualified_name in self.object_by_fully_qualified_name:
                 msg = ("Not exists registered object: {}".format(object_fully_qualified_name))
                 msg += ("\nfor proccess: {}".format(process_name))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             object = self.object_by_fully_qualified_name[object_fully_qualified_name]
             if object is None:
                 msg = ("None object: {}".format(object_fully_qualified_name))
                 msg += ("\nfor proccess: {}".format(process_name))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             method = None
             try:
@@ -659,18 +658,18 @@ class InspectiaDialog(QDialog):
             except AttributeError as e:
                 msg = ("For proccess: {}".format(process_name))
                 msg += ("\nError: {}".format(str(e)))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             if method is None:
                 msg = ("No found method: {} in object: {}".format(object_method_name, object_fully_qualified_name))
                 msg += ("\nfor proccess: {}".format(process_name))
-                Tools.info_msg(msg)
+                info_msg(msg)
                 return
             # str_error = object.run_library_process(process, self)
             self.project.pgs_connection.set_current_project_id(project_id)
             str_error, end_date_time, log = method(process, self)
             if str_error:
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 return
             process_log = ''
             if not log is None:
@@ -681,7 +680,7 @@ class InspectiaDialog(QDialog):
         else:
             str_error, arguments = self.processes_manager.get_process_arguments(process_provider, process_name)
             if str_error:
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 return
             arguments.append('--' + defs_qprocess.ARGPARSER_TAG_STRING_TO_PUBLISH_THE_NUMBER_OF_STEPS)
             arguments.append('\"' + defs_qprocess.STRING_TO_PUBLISH_THE_NUMBER_OF_STEPS_DEFAULT + '\"')
@@ -726,15 +725,15 @@ class InspectiaDialog(QDialog):
                                               process_output,
                                               process_remarks)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         else:
             str_msg = "Process completed successfully"
-            Tools.info_msg(str_msg)
+            info_msg(str_msg)
         if self.qgis_iface:
             str_error = self.qgis_iface.reload_all_layers()
             if str_error:
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 return
         return
 
@@ -742,12 +741,12 @@ class InspectiaDialog(QDialog):
                            is_process_creation = False):
         if not self.project:
             str_error = ('Not exists project')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return False
         str_error, definition_is_saved = self.project.project_definition_gui(is_process_creation, self)
         if str_error:
             str_error = ('Project definition, error:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return False
         return definition_is_saved
 
@@ -761,7 +760,7 @@ class InspectiaDialog(QDialog):
         dialog_result = dialog.exec()
         if not dialog_result == QDialog.Accepted:
             str_error = ('Not registered')
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         name = dialog.name
         email = dialog.email
@@ -771,7 +770,7 @@ class InspectiaDialog(QDialog):
         # str_error = self.project.login(url, username, password)
         if str_error:
             str_error = ('Error registering:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         return
 
@@ -783,7 +782,7 @@ class InspectiaDialog(QDialog):
             return
         str_error = self.project.remove_map_view(map_view_id)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
         self.update_map_views()
         return
 
@@ -831,7 +830,7 @@ class InspectiaDialog(QDialog):
         dialog_result = dialog.exec()
         # if dialog_result != QDialog.Accepted:
         #     return str_error
-        # Tools.error_msg(str_error)
+        # error_msg(str_error)
         return str_error
 
     def select_project(self):
@@ -852,7 +851,7 @@ class InspectiaDialog(QDialog):
             str_error, project_role = self.pgs_connection.get_project_role_by_name(project_name)
             if str_error:
                 str_error = ('Getting role for project: {}, error:\n{}'.format(project_name, str_error))
-                Tools.error_msg(str_error)
+                error_msg(str_error)
                 self.projectComboBox.setCurrentIndex(0)
                 return
             self.projectRoleLineEdit.setEnabled(True)
@@ -950,17 +949,17 @@ class InspectiaDialog(QDialog):
             return
         str_error, wkb_geometry = self.project.get_map_view_wkb_geometry(map_view_id)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.update_locations()
             return
         if not wkb_geometry:
             str_error = ('Null geometry for location: {}'.format(map_view_id))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.update_locations()
             return
         str_error = self.qgis_iface.set_map_canvas_from_wkb_geometry_in_project_crs(wkb_geometry)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.update_locations()
             return
         return
@@ -976,12 +975,12 @@ class InspectiaDialog(QDialog):
             return
         str_error, wkb_geometry = self.qgis_iface.get_map_canvas_wkb_geometry_in_project_crs()
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.update_locations()
             return
         str_error = self.project.update_map_view(map_view_id, wkb_geometry)
         if str_error:
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             self.update_locations()
             return
         self.update_map_views()
@@ -1042,7 +1041,7 @@ class InspectiaDialog(QDialog):
         str_error, project_names = self.pgs_connection.get_project_names()
         if str_error:
             str_error = ('Error getting project names:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         if self.toolBox.isItemEnabled(0):
             project_names_to_add_as_list = []
@@ -1073,7 +1072,7 @@ class InspectiaDialog(QDialog):
         str_error = self.pgs_connection.get_users()
         if str_error:
             str_error = ('Error getting users:\n{}'.format(str_error))
-            Tools.error_msg(str_error)
+            error_msg(str_error)
             return
         project_users = self.project.db_project[defs_server_api.PROJECT_TAG_USERS]
         for project_user in project_users:
@@ -1124,5 +1123,5 @@ class InspectiaDialog(QDialog):
         # str_error = self.qgis_iface.update_all()
         # if str_error:
         #     str_error += ('Updating QGIS, error:\n{}'.format(str_error))
-        #     Tools.error_msg(str_error)
+        #     error_msg(str_error)
         return

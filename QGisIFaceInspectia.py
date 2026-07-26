@@ -1,8 +1,9 @@
 # authors:
 # David Hernandez Lopez, david.hernandez@uclm.es
 
-from defs import defs_qgis
-from pyLibQGIS.QGisIFace import QGisIFace
+from pyLibQGIS import QGisIFace
+
+from inspectia_defs import defs_qgis
 
 class QGisIFaceInspectia(QGisIFace):
     def __init__(self, iface, plugin_path):

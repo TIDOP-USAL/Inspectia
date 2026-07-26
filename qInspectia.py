@@ -44,7 +44,7 @@ projVersionMajor = osr.GetPROJVersionMajor()
 pluginsPath = QFileInfo(QgsApplication.qgisUserDatabaseFilePath()).path()
 pluginPath = os.path.dirname(os.path.realpath(__file__))
 pluginPath = os.path.join(pluginsPath, pluginPath)
-libPath = os.path.join(pluginPath, 'core')
+libPath = os.path.join(pluginPath, 'inspectia_core')
 # existsPluginPath = QDir(libPath).exists()
 sys.path.append(pluginPath)
 sys.path.append(libPath)
@@ -52,9 +52,9 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(current_path, '..'))
 
 # Import the code for the dialog
-from gui import InspectiaDialog
-from defs import defs_main
-import QGisIFaceInspectia
+from inspectia_gui.InspectiaDialog import InspectiaDialog
+from inspectia_defs import defs_main
+from QGisIFaceInspectia import QGisIFaceInspectia
 
 # # sys.path.append("C:\Program Files\JetBrains\PyCharm 2020.3\debug-eggs\pydevd-pycharm.egg") # dhl
 # sys.path.append("C:\Program Files\JetBrains\PyCharm 2023.2\debug-eggs\pydevd-pycharm.egg")  # dhl
@@ -73,6 +73,7 @@ class qInspectia(object):
         # pydevd.settrace('localhost', port=54000)
         # pydevd.settrace('localhost', port=54100, stdoutToServer=True, stderrToServer=True)
         # pydevd_pycharm.settrace('localhost',port=54100, stdoutToServer=True, stderrToServer=True) # old
+
         # pydevd_pycharm.settrace('localhost',port=54100, stdout_to_server=True, stderr_to_server=True)
 
         self.projVersionMajor = projVersionMajor

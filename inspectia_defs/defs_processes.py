@@ -2,7 +2,7 @@
 # David Hernandez Lopez, david.hernandez@uclm.es
 import os
 
-from pyLibGisApi.defs import defs_processes as gis_api_defs_processes
+from pyLibGisApi import defs_processes as gis_api_defs_processes
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 

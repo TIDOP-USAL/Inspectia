@@ -11,8 +11,9 @@ from qgis.PyQt.QtWidgets import (QApplication, QMessageBox, QDialog, QInputDialo
                              QDialogButtonBox, QVBoxLayout, QTableWidget, QTableWidgetItem, QLabel, QAbstractItemView)
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, QSize, Qt, QDate
 
-from defs import defs_pgLayersManagement as defs_pglm
-from pyLibGisApi.defs import defs_server_api
+from pyLibGisApi import defs_server_api
+
+from inspectia_defs import defs_pgLayersManagement as defs_pglm
 
 class PostgisLayersManagementDialog(QDialog):
     """Employee dialog."""

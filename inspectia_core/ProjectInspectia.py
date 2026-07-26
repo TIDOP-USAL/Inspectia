@@ -6,17 +6,18 @@ import json
 
 from qgis.PyQt.QtCore import QDir, QFileInfo, QFile, QDate, QDateTime
 
-from defs import defs_pgLayersManagement
-from pyLibProject.defs import defs_project_definition
-from pyLibProject.core.Project import Project
-from pyLibProject.defs import defs_project
-from pyLibProject.defs import defs_layers_groups
-from pyLibProject.defs import defs_layers
-from pyLibGisApi.core.PostGISServerAPI import PostGISServerAPI
-from pyLibGisApi.defs import defs_server_api
-from pyLibProcesses.defs import defs_project as processes_defs_project
-from pyLibProcesses.defs import defs_processes as processes_defs_processes
-from gui import PostgisLayersManagementDialog
+from pyLibProject import defs_project_definition
+from pyLibProject import Project
+from pyLibProject import defs_project
+from pyLibProject import defs_layers_groups
+from pyLibProject import defs_layers
+# from pyLibGisApi.core.PostGISServerAPI import PostGISServerAPI
+from pyLibGisApi import defs_server_api
+from pyLibProcesses import defs_project as processes_defs_project
+# from pyLibProcesses.defs import defs_processes as processes_defs_processes
+
+from inspectia_defs import defs_pgLayersManagement
+from inspectia_gui.PostgisLayersManagementDialog import PostgisLayersManagementDialog
 
 class ProjectInspectia(Project):
     def __init__(self, qgis_iface, settings, crs_tools, pgs_connection, data_model):
